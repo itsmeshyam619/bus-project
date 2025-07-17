@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Track Bus</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    
+    <!-- Internal Stylish CSS -->
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #00c6ff, #0072ff);
+            color: #fff;
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 32px;
+            color: #ffe600;
+            text-shadow: 2px 2px #000;
+        }
+
+        #map {
+            height: 500px;
+            width: 90%;
+            margin: 20px auto;
+            border: 5px solid #fff;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            animation: pulse 3s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            }
+            50% {
+                box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            }
+            100% {
+                box-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+            }
+        }
+
+        div.details {
+            width: 90%;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 20px auto;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px #fff;
+            backdrop-filter: blur(8px);
+        }
+
+        .details h3 {
+            margin-bottom: 15px;
+            font-size: 26px;
+            color: #ffeb3b;
+        }
+
+        .details ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .details li {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .details strong {
+            color: #ff5722;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h2>Live Tracking: Bus {{ bus.bus_no }}</h2>
+
+    <div id="map"></div>
+
+    <div class="details">
+        <h3>Bus Details:</h3>
+        <ul>
+            <li><strong>Bus Number:</strong> {{ bus.bus_no }}</li>
+            <li><strong>Route ID:</strong> {{ bus.route_id }}</li>
+            <li><strong>Departure Place:</strong> {{ bus.departure_place }}</li>
+            <li><strong>Destination Place:</strong> {{ bus.destination_place }}</li>
+            <li><strong>Start Time:</strong> {{ bus.start_time }}</li>
+            <li><strong>Available Seats:</strong> {{ bus.available_seats }}</li>
+            <li><strong>Current Latitude:</strong> {{ bus.current_latitude }}</li>
+            <li><strong>Current Longitude:</strong> {{ bus.current_longitude }}</li>
+        </ul>
+    </div>
+
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
+
+    <script>
+        let map = L.map('map').setView([{{ bus.current_latitude }}, {{ bus.current_longitude }}], 15);
+
+        let marker = L.marker([{{ bus.current_latitude }}, {{ bus.current_longitude }}], {
+            bounceOnAdd: true
+        }).addTo(map);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        function updateBusLocation() {
+            fetch('/api/get-location/{{ bus.bus_no }}/')
+                .then(res => res.json())
+                .then(data => {
+                    marker.setLatLng([data.latitude, data.longitude]);
+                    map.flyTo([data.latitude, data.longitude], 15, {
+                        animate: true,
+                        duration: 2  // smooth transition
+                    });
+                });
+        }
+
+        setInterval(updateBusLocation, 5000);  // Update every 5 seconds
+    </script>
+</body>
+</html>

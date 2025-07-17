@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bus Schedule</title>
+    <style>
+        /* Body background and centering */
+        body {
+            background: linear-gradient(to right, #00c6ff, #0072ff); /* Vibrant blue gradient */
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #ffffff;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+        }
+
+        /* Admin login button */
+        .admin-login {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            padding: 10px 20px;
+            background-color: #ff5722;
+            color: white;
+            border: none;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        .admin-login:hover {
+            background-color: #e64a19;
+        }
+
+        /* Link styling */
+        a {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #673ab7;
+            color: white;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            transition: background 0.3s ease;
+        }
+        a:hover {
+            background-color: #512da8;
+        }
+
+        h1 {
+            font-size: 48px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px #00000088;
+        }
+    </style>
+</head>
+<body>
+
+    <a class="admin-login" href="/admin/">Admin Login</a>
+
+    <h1>Welcome to Bus Schedule System</h1>
+
+    <a href="{% url 'schedule' %}">Search for Buses</a>
+
+</body>
+</html>

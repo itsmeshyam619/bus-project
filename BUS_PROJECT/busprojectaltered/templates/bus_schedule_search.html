@@ -1,0 +1,43 @@
+<!-- busapp/templates/busapp/bus_schedule_search.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bus Schedule</title>
+</head>
+<body>
+
+    <h1>Search Available Buses</h1>
+
+    <form method="POST">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Search</button>
+    </form>
+
+    {% if available_buses %}
+        <h2>Available Buses</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Bus No</th>
+                    <th>Departure Time</th>
+                    <th>Seats Available</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for bus in available_buses %}
+                    <tr>
+                        <td>{{ bus.bus_no }}</td>
+                        <td>{{ bus.departure_time }}</td>
+                        <td>{{ bus.seats_available }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+
+</body>
+</html>

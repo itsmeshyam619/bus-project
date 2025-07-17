@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Search Bus Schedule</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+            margin: 0;
+            padding: 20px;
+            animation: fadeIn 2s ease-in;
+        }
+
+        h2 {
+            text-align: center;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            color: #ffe600;
+            text-shadow: 2px 2px 5px #000;
+        }
+
+        form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto 30px auto;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+            animation: slideIn 1s ease-out;
+        }
+
+        select, input[type="time"], input[type="email"], input[type="number"] {
+            width: 95%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 20px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1em;
+            color: #333;
+            transition: 0.3s;
+            box-sizing: border-box;
+        }
+
+        select:focus, input:focus {
+            background: #ffe600;
+            color: #000;
+            transform: scale(1.02);
+            outline: none;
+        }
+
+        button[type="submit"] {
+            background: #ff416c;
+            background: linear-gradient(to right, #ff4b2b, #ff416c);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1em;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: background 0.5s, transform 0.3s;
+            display: block;
+            margin: 0 auto;
+        }
+
+        button[type="submit"]:hover {
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            transform: scale(1.1);
+        }
+
+        #bus-list {
+            list-style: none;
+            padding: 0;
+            max-width: 800px;
+            margin: 0 auto;
+            animation: fadeIn 2s ease-in;
+        }
+
+        #bus-list li {
+            background: rgba(255, 255, 255, 0.15);
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            transition: 0.5s;
+        }
+
+        #bus-list li:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-5px);
+        }
+
+        strong {
+            font-size: 1.5em;
+            color: #ffe600;
+        }
+
+        .seats {
+            font-size: 1em;
+            color: #fff;
+            margin-top: 10px;
+            display: block;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+            color: #ffeb3b;
+        }
+
+        .booking-form {
+            margin-top: 10px;
+            background: rgba(0,0,0,0.2);
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .booking-form input {
+            margin-top: 8px;
+            width: 95%;
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+
+        a {
+            display: inline-block;
+            margin-top: 10px;
+            background: #00e676;
+            padding: 8px 20px;
+            border-radius: 20px;
+            color: #000;
+            font-weight: bold;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+
+        a:hover {
+            background: #1de9b6;
+            transform: scale(1.05);
+        }
+
+        em {
+            color: #ffeb3b;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(-100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+    <h2>Find Your Bus</h2>
+
+    <form method="POST" action="{% url 'search_buses' %}">
+        {% csrf_token %}
+        <label>From:</label>
+        <select name="from" required>
+            <option value="">Select a location</option>
+            <option value="Mattuthavani">Mattuthavani</option>
+            <option value="Thirumangalam">Thirumangalam</option>
+            <option value="Arapalayam">Arapalayam</option>
+            <option value="Periyar">Periyar</option>
+        </select><br>
+        
+        <label>To:</label>
+        <select name="to" required>
+            <option value="">Select a location</option>
+            <option value="Mattuthavani">Mattuthavani</option>
+            <option value="Thirumangalam">Thirumangalam</option>
+            <option value="Arapalayam">Arapalayam</option>
+            <option value="Periyar">Periyar</option>
+        </select><br>
+        
+        <label>Departure After:</label>
+        <input type="time" name="time" required><br>
+
+        <button type="submit">Search</button>
+    </form>
+
+    <ul id="bus-list">
+    {% for bus in buses %}
+        <li id="bus-{{ bus.id }}">
+            <strong>{{ bus.bus_no }}</strong>: {{ bus.departure_place }} → {{ bus.destination_place }} at {{ bus.start_time }}<br>
+            <span class="seats">Seats Available: <span class="seat-count">{{ bus.available_seats }}</span></span>
+
+            {% if user.is_authenticated %}
+            <form class="booking-form" data-bus-id="{{ bus.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="bus_id" value="{{ bus.id }}">
+            
+                <label>Email:</label>
+                <input type="email" name="mail" class="mail" title="Enter a valid gmail" required><br>
+            
+                <label>Seats:</label>
+                <input type="number" name="seats" min="1" max="{{ bus.available_seats }}" value="1" required>
+            
+                <button type="submit">Book</button>
+            </form>
+            
+            {% else %}
+                <p><em>Login to book seats</em></p>
+            {% endif %}
+            <a href="{% url 'track_bus' bus.id %}">Track Bus</a>
+        </li>
+    {% endfor %}
+    </ul>
+
+</body>
+<script>
+    $(document).ready(function() {
+        $('.booking-form').on('submit', function(e) {
+            e.preventDefault();
+
+            const form = $(this);
+            const busId = form.data('bus-id');
+            const seats = form.find('input[name="seats"]').val();
+            const email = form.find('input[name="mail"]').val();
+            const csrfToken = form.find('input[name="csrfmiddlewaretoken"]').val();
+
+            $.ajax({
+                type: 'POST',
+                url: "{% url 'book_bus_ajax' %}",
+                data: {
+                    'bus_id': busId,
+                    'seats': seats,
+                    'mail':email,
+                    'csrfmiddlewaretoken': csrfToken
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire({
+                            title: 'Booking Confirmed!',
+                            text: `You have successfully booked ${seats} seat(s) on Bus No: ${response.bus_no}`,
+                            icon: 'success',
+                            confirmButtonText: 'Ok'
+                        }).then(() => {
+                            $(`#bus-${busId}`).hide();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: 'Booking Failed',
+                            text: response.message,
+                            icon: 'error',
+                            confirmButtonText: 'Ok'
+                        });
+                    }
+                },
+                error: function(xhr) {
+                    alert("Error: " + xhr.responseJSON.message);
+                }
+            });
+        });
+    });
+</script>
+</html>
